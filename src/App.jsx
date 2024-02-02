@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Square({ value, onSquareClick, isWinningSquare }) {
+function Square({ value, onSquareClick, isWinningSquare, currentMove }) {
 
   //преобретение цвета
   const squareStyle = {
@@ -9,12 +9,15 @@ function Square({ value, onSquareClick, isWinningSquare }) {
 
   return (
     <button className="square" style={squareStyle} onClick={onSquareClick}>
+
+      {currentMove === 0 ? 'You are at move #' + currentMove : null}
+
       {value}
     </button>
   )
 }
 
-function Board({ xIsNext, squares, onPlay, cellColor }) {
+function Board({ xIsNext, squares, onPlay, cellColor, currentMove }) {
   function renderSquare(i) {
     const isWinningSquare = winningSquares && winningSquares.includes(i)
     return (
@@ -23,6 +26,8 @@ function Board({ xIsNext, squares, onPlay, cellColor }) {
         value={squares[i]}
         onSquareClick={() => handleClick(i)}
         isWinningSquare={isWinningSquare}
+        currentMove={currentMove}
+
       />
     )
   }
@@ -153,14 +158,25 @@ export default function Game() {
   const xIsNext = currentMove % 2 === 0
   const currentSquares = history[currentMove]
 
-  function handlePlay(nextSquares) {
+  function handlePlay(nextSquares, nextMove) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares]
     setHistory(nextHistory)
     setCurrentMove(nextHistory.length - 1)
+
+    const currentSquares = nextHistory[nextMove]
+    const row = Math.floor(nextMove / boardSize) + 1
+    const col = (nextMove % boardSize) + 1
+    console.log(`You are at move #${nextMove}(row:${row},col:${col})`)
   }
 
   function jumpTo(nextMove) {
     setCurrentMove(nextMove)
+
+    const currentSquares = history[nextMove]
+    const row = Math.floor(nextMove / boardSize) + 1
+    const col = (nextMove % boardSize) + 1
+    console.log(`You are at move #${nextMove}(row:${row},col:${col})`)
+
   }
 
   function toggleSortOrder() {
@@ -187,7 +203,7 @@ export default function Game() {
   // }
 
   const moves = history.map((squares, move) => {
-    const description = move > 0 ? 'Go to move #' + move : 'Go to game start'
+    const description = move > 0 ? `Go to move #${move} (row: ${(Math.floor(move / boardSize) + 1)}, col: ${((move % boardSize) + 1)})` : 'Go to game start'
     return (
       <li key={move}>
         <button onClick={() => jumpTo(move)}>{description}</button>
